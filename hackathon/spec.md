@@ -8,11 +8,10 @@ provider. Current code: src/main.ts, src/loop.ts (agent loop), src/provider.ts
 (HTTP client), src/tools/ (vault tools), src/consent/ (confirmation UI),
 src/view.ts (chat panel).
 
-We are extending it for submission to the Gemma 4 Good Hackathon (deadline May
-18, 2026). The submission is a privacy-first grounded research assistant: a
-multi-agent pipeline that runs entirely on the user's machine via local Gemma 4
-served by MLX, with an independent verifier agent that catches hallucinated
-citations.
+We are extending it for submission to the AMD Developer Hackathon: Act II. The
+submission is a grounded research assistant: a multi-agent pipeline that goes
+beyond simple RAG, running on open models served by vLLM on AMD Developer Cloud
+(ROCm), with an independent verifier agent that catches hallucinated citations.
 
 The existing single-agent flow must continue to work unchanged. The new
 multi-agent flow is opt-in via "agent packs."
@@ -35,9 +34,9 @@ multi-agent flow is opt-in via "agent packs."
    <vault>/.obsidian/plugins/open-agent/packs/*.json. Ship one default pack
    named "grounded-research" that wires retriever → synthesizer → verifier.
 6. Allow each agent in a pack to use a different provider/model endpoint. The
-   default pack should point at three local MLX endpoints (E4B for retriever
-   and verifier, 31B Dense for synthesizer) but be trivially swappable to any
-   OpenAI-compatible provider by editing the providers block.
+   AMD pack should point at open models served by vLLM on AMD Developer Cloud
+   (per-role or a single shared endpoint) but be trivially swappable to any
+   OpenAI-compatible provider by editing the providers block / env vars.
 7. Render verifier results in the chat panel: per-claim badges (✅ verified,
    ⚠️ quote present but doesn't support, ❌ quote not found), collapsible
    claim details, clickable source-note links, and a footer line showing which
@@ -59,7 +58,8 @@ multi-agent flow is opt-in via "agent packs."
 - No changes to the existing single-agent chat flow — it must keep working
   exactly as today when no pack is selected.
 - No new providers beyond what the existing OpenAI-compatible client already
-  supports. MLX is reached via its standard OpenAI-compatible endpoint.
+  supports. vLLM on AMD Developer Cloud is reached via its standard
+  OpenAI-compatible endpoint.
 
 ## Acceptance criteria
 
@@ -96,7 +96,7 @@ multi-agent flow is opt-in via "agent packs."
   baseline-vs-verified, total claims, total flagged, and per-query breakdown.
 - README on main is unchanged except for a small banner near the top pointing
   to hackathon/. hackathon/README.md tells the submission story end to end:
-  problem, architecture, how to run with local Gemma + MLX, eval results.
+  problem, architecture, how to run on AMD Developer Cloud (ROCm), eval results.
 - All existing tests pass. New unit tests cover: pack loading + schema
   validation, structured-output validation + retry, the in-code quote-match
   function, and the orchestrator running a pipeline end-to-end against a
@@ -171,4 +171,4 @@ hackathon/
 - One bundled default pack in `src/packs/defaults/grounded-research.json`.
 - `hackathon/README.md`, `hackathon/eval/` with a committed 20-query corpus and
   generated results, and `hackathon/demo/script.md`.
-- Release tagged `v0.1.0-gemma4-hackathon` at submission time.
+- Release tagged `v0.2.0-amd-hackathon` at submission time.

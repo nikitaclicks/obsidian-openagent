@@ -18,9 +18,11 @@ Every eval run does the same thing in both modes:
 
 | Stage | Model | What it does |
 |---|---|---|
-| Retriever | `gemma-4-E4B-it-MLX-8bit` (4B) | Scans the vault, selects relevant notes, writes a brief summary of the evidence |
-| Synthesizer | `gemma-4-31B-it-MLX-8bit` (31B) | Reads the retriever brief + raw notes, produces structured `claims-v1` JSON (claim text + source note + source quote) |
-| Verifier | `gemma-4-26B-A4B-it-MLX-8bit` (26B MoE) | For each claim, checks whether the cited quote actually supports the claim text; outputs `verified`, `unsupported`, or `quote-missing` |
+| Retriever | `Qwen/Qwen2.5-7B-Instruct` | Scans the vault, selects relevant notes, writes a brief summary of the evidence |
+| Synthesizer | `meta-llama/Llama-3.3-70B-Instruct` | Reads the retriever brief + raw notes, produces structured `claims-v1` JSON (claim text + source note + source quote) |
+| Verifier | `Qwen/Qwen2.5-32B-Instruct` | For each claim, checks whether the cited quote actually supports the claim text; outputs `verified`, `unsupported`, or `quote-missing` |
+
+Models are served by vLLM on AMD Developer Cloud (ROCm) via OpenAI-compatible endpoints; see [../AMD-RUNBOOK.md](../AMD-RUNBOOK.md). A single 70B model can also serve all three roles (Option A).
 
 ### Claim statuses
 
@@ -62,14 +64,12 @@ Results written to: `hackathon/eval/results/fixture-<timestamp>.json` and `.md`
 npm run eval:live
 ```
 
-Runs against the real Nobel Physics vault (`hackathon/data/nobel_physics/`) with real Gemma 4 models. Results have run-to-run variance because local inference is non-deterministic.
+Runs against the real Nobel Physics vault (`hackathon/data/nobel_physics/`) with real open models served on AMD Developer Cloud. Results have run-to-run variance because inference is non-deterministic.
 
 **Requirements:**
-- Local OpenAI-compatible server running at `http://127.0.0.1:8000/v1`
-- Three model IDs exposed:
-  - `gemma-4-E4B-it-MLX-8bit`
-  - `gemma-4-31B-it-MLX-8bit`
-  - `gemma-4-26B-A4B-it-MLX-8bit`
+- vLLM (ROCm) serving the models over an OpenAI-compatible API on AMD Developer Cloud — see [../AMD-RUNBOOK.md](../AMD-RUNBOOK.md)
+- The AMD pack and its env vars set: `--pack src/packs/defaults/grounded-research.amd.json`, with `AMD_RETRIEVER_URL` / `AMD_SYNTHESIZER_URL` / `AMD_VERIFIER_URL` / `AMD_API_KEY` exported
+- Model IDs match what vLLM is serving (defaults: `Qwen/Qwen2.5-7B-Instruct`, `meta-llama/Llama-3.3-70B-Instruct`, `Qwen/Qwen2.5-32B-Instruct`)
 
 **Optional flags:**
 

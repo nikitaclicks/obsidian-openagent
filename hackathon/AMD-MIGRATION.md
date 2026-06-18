@@ -81,15 +81,16 @@ The pack id is `grounded-research.amd` (dot variant), which `isCompatiblePackId`
 `run.ts` accepts against the existing benchmark `packId: "grounded-research"` — so the
 committed Nobel benchmark works without edits.
 
-Then update `hackathon/RESULTS.md` headline numbers to reflect the AMD-hosted model
-(currently Gemma). The hallucination-delta story carries over unchanged.
+`hackathon/README.md` and `hackathon/RESULTS.md` are already reframed for AMD with
+results placeholders — just drop in the headline numbers from the generated report.
+The hallucination-delta story carries over unchanged.
 
 ## Submission checklist
 
 - [ ] vLLM up on AMD Dev Cloud, pack `baseUrl` set, smoke query returns in Obsidian
 - [ ] `npm run build && npm run lint && npm test -- --run` green
-- [ ] `eval:live` re-run on AMD model; RESULTS.md numbers + model names updated
-- [ ] README/RESULTS reframed: AMD Dev Cloud + ROCm + open model (drop Gemma/MLX framing)
-- [ ] LICENSE confirmed MIT (already is)
+- [ ] `eval:live` re-run on AMD model; fill RESULTS.md / README.md result placeholders
+- [x] README/RESULTS/spec reframed: AMD Dev Cloud + ROCm + open model (Gemma/MLX framing dropped)
+- [x] LICENSE confirmed MIT
 - [ ] Demo video: show the verifier catching a hallucination, note "running on AMD MI300X"
 ```
