@@ -7,6 +7,7 @@ import type { ClaimVerificationStatus } from "../../src/agents/verifier";
 import type { ClaimsV1 } from "../../src/agents/schemas/claims-v1";
 import type { OpenAICompatibleConfig } from "../../src/provider-config";
 import groundedResearchDefault from "../../src/packs/defaults/grounded-research.json";
+import { resolvePackEnv } from "../../src/packs/loader";
 import {
 	preparePackExecution,
 	runPackForEval,
@@ -750,7 +751,7 @@ async function loadPackFile(packPath: string): Promise<AgentPack> {
 		}
 		throw error;
 	});
-	return JSON.parse(raw) as AgentPack;
+	return resolvePackEnv(JSON.parse(raw) as AgentPack, packPath);
 }
 
 async function buildPerQueryReport(

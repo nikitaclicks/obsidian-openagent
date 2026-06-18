@@ -1,0 +1,63 @@
+{
+  "id": "grounded-research.amd",
+  "name": "Grounded Research (AMD)",
+  "description": "Grounded research on open models served by vLLM on AMD Developer Cloud (ROCm). Edit baseUrl/apiKey for your instance.",
+  "support": {
+    "mobile": false
+  },
+  "providers": {
+    "retriever": {
+      "baseUrl": "${AMD_RETRIEVER_URL}",
+      "apiKey": "${AMD_API_KEY}",
+      "model": "Qwen/Qwen2.5-7B-Instruct"
+    },
+    "synthesizer": {
+      "baseUrl": "${AMD_SYNTHESIZER_URL}",
+      "apiKey": "${AMD_API_KEY}",
+      "model": "meta-llama/Llama-3.3-70B-Instruct"
+    },
+    "verifier": {
+      "baseUrl": "${AMD_VERIFIER_URL}",
+      "apiKey": "${AMD_API_KEY}",
+      "model": "Qwen/Qwen2.5-32B-Instruct"
+    }
+  },
+  "agents": {
+    "retriever": {
+      "name": "Retriever",
+      "provider": "retriever",
+      "systemPrompt": "You are a privacy-first research retriever. Summarize the strongest evidence from the provided notes. Do not invent sources."
+    },
+    "synthesizer": {
+      "name": "Synthesizer",
+      "provider": "synthesizer",
+      "systemPrompt": "You produce JSON only. Build grounded claims using only the provided note evidence."
+    },
+    "verifier": {
+      "name": "Verifier",
+      "provider": "verifier",
+      "systemPrompt": "You verify whether quoted note text supports a claim. Return JSON only."
+    }
+  },
+  "steps": [
+    {
+      "id": "retriever",
+      "label": "Retrieving notes",
+      "agent": "retriever",
+      "kind": "retrieval"
+    },
+    {
+      "id": "synthesizer",
+      "label": "Drafting claims",
+      "agent": "synthesizer",
+      "kind": "structured",
+      "schema": "claims-v1"
+    },
+    {
+      "id": "verifier",
+      "label": "Verifying claims",
+      "agent": "verifier",
+      "kind": "verification"
+    }
+  ]
+}

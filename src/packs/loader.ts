@@ -38,12 +38,39 @@ export async function loadPacks(app: App, pluginDir: string): Promise<AgentPack[
 			const errors = (validate.errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message ?? "invalid"}`).join("; ");
 			throw new PackValidationError(`Invalid pack at ${path}: ${errors}`);
 		}
-		const pack = parsed;
+		const pack = resolvePackEnv(parsed, path);
 		assertPackIntegrity(pack, path);
 		packs.push(pack);
 	}
 
 	return packs;
+}
+
+const ENV_PATTERN = /\$\{([A-Z0-9_]+)\}/g;
+
+/**
+ * Resolves `${ENV_VAR}` references in a pack's provider strings (baseUrl, apiKey,
+ * model) from the process environment, so secrets never need to live in committed
+ * pack JSON. Throws PackValidationError if a referenced variable is unset or empty.
+ * Mutates and returns the same pack object.
+ */
+export function resolvePackEnv(pack: AgentPack, path: string): AgentPack {
+	const resolveString = (value: string): string =>
+		value.replace(ENV_PATTERN, (_match, name: string) => {
+			const env = typeof process !== "undefined" ? process.env?.[name] : undefined;
+			if (env === undefined || env === "") {
+				throw new PackValidationError(`Invalid pack at ${path}: environment variable ${name} is not set`);
+			}
+			return env;
+		});
+
+	for (const provider of Object.values(pack.providers)) {
+		provider.baseUrl = resolveString(provider.baseUrl);
+		provider.apiKey = resolveString(provider.apiKey);
+		provider.model = resolveString(provider.model);
+	}
+
+	return pack;
 }
 
 function assertPackIntegrity(pack: AgentPack, path: string): void {
